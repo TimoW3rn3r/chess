@@ -16,7 +16,7 @@ class Board
   end
 
   def square_at(position)
-    square = squares.dig(position[0], position[1])
+    square = squares.dig(position[1], position[0])
   end
 
   def draw

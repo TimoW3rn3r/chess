@@ -1,7 +1,11 @@
+require_relative 'constants'
 require_relative 'board'
 require_relative 'player'
+require_relative 'piece'
 
 class Game
+  include DefaultPositions
+
   attr_reader :players, :board
 
   def initialize
@@ -11,6 +15,20 @@ class Game
     @player_turn_next = nil
   end
 
+  def notation_to_coordinates(notation)
+    x, y = String(notation).split('')
+    x_coordinate = x.ord - 'a'.ord
+    y_coordinate = 7 - (y.to_i - 1)
+    [x_coordinate, y_coordinate]
+  end
+
+  def coordinates_to_notation(coordinates)
+    x_coordinate, y_coordinate = coordinates
+    x = (97 + x_coordinate).chr
+    y = (7 - y_coordinate + 1).to_s
+    x + y
+  end
+  
   def add_player(name, color)
     players.push(Player.new(name, color))
   end
@@ -33,8 +51,18 @@ class Game
     end
   end
 
+  def add_pieces(player, pieces)
+    pieces.each do |notation, name|
+      position = notation_to_coordinates(notation)
+      piece = Piece.for(player, name, position)
+      board.square_at(position).insert_piece(piece)
+    end
+  end
+
   def play_round
     add_players if players.empty?
+    add_pieces(players.first, WHITE_PIECES)
+    add_pieces(players.last, BLACK_PIECES)
     display
   end
 

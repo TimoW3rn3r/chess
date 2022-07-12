@@ -27,7 +27,14 @@ class Square
 
   def to_s
     rgb = color.join(';')
-    "\e[48;2;#{rgb}m #{piece || ' '} \e[m"
+    return "\e[48;2;#{rgb}m   \e[m" unless piece
+    
+    case piece.color
+    when :white
+      "\e[1;1;48;2;#{rgb}m #{piece || ' '} \e[m"
+    when :black
+      "\e[0;30;48;2;#{rgb}m #{piece || ' '} \e[m"
+    end
   end
 end
 
