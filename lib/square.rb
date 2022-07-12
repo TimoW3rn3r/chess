@@ -3,26 +3,31 @@ require_relative 'constants'
 class Square
   include Colors
 
-  attr_reader :position, :piece, :squares
+  attr_reader :piece, :position
 
-  @@squares = Array.new(8) { [] }
-
-  def self.at(position)
-    square = @@squares.dig(position[0], position[1])
-    unless square
-      if position.sum.even?
-        return BlackSquare.new(position)
-      else
-        return WhiteSquare.new(position)
-      end
-    end
-    square
+  def self.for(position)
+    return WhiteSquare.new(position) if position.sum.even?
+    
+    BlackSquare.new(position)
   end
-
+  
   def initialize(position, piece = nil)
     @position = position
     @piece = piece
-    @@squares[position[0]][position[1]] = self
+  end
+
+  def insert_piece(piece)
+    @piece = piece
+    piece.update_position(position)
+  end
+
+  def color
+    color_normal
+  end
+
+  def to_s
+    rgb = color.join(';')
+    "\e[48;2;#{rgb}m #{piece || ' '} \e[m"
   end
 end
 

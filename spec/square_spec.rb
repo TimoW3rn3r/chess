@@ -1,34 +1,26 @@
 require './lib/square'
+require './lib/piece'
 
 describe Square do
-  describe '#initialize' do
-    subject(:square) { described_class.new([1, 5], 'rook')}
+  subject(:square) { described_class.new([1, 5], 'rook') }
+  subject(:piece) { double(Piece, position: [1, 2], update_position: nil)}
 
-    it 'creates new Square object with given position and piece value' do
-      expect(square).to be_a(Square)
-      expect(square.position).to eq([1, 5])
-      expect(square.piece).to eq('rook')
-    end
-
-    it 'registers itself into class variable' do
-      p square
-      expect(described_class.at([1, 5])).to be(square)
+  describe '.for' do
+    it 'returns white square when given position with even sum' do
+      expect(Square.for([2, 0])).to be_a(WhiteSquare)
     end
   end
-  
-  describe 'Square.at' do
-    it 'returns new "BlackSquare" object when coordinates with even sum is passed' do
-      expect(described_class.at([1, 1])).to be_a(BlackSquare)
-    end
 
-    it 'returns new "WhiteSquare" object when coordinates with odd sum is passed' do
-      expect(described_class.at([7, 0])).to be_a(WhiteSquare)
+  describe '#insert_piece' do
+    it 'updates reference of piece variable to passed piece object' do
+      square.insert_piece(piece)
+      expect(square.piece).to be(piece)
     end
   end
 end
 
 describe WhiteSquare do
-  subject(:white_square) { described_class.new([1, 1])  }
+  subject(:white_square) { described_class.new([1, 1]) }
   describe '#color_normal' do
     it 'returns rgb value for white square' do
       expect(white_square.color_normal).to eq([240, 217, 181])
