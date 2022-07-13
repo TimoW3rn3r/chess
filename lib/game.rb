@@ -7,6 +7,7 @@ class Game
   include DefaultPositions
 
   attr_reader :players, :board
+  attr_accessor :player_turn_now, :player_turn_next
 
   def initialize
     @board = Board.new
@@ -42,32 +43,99 @@ class Game
   def add_players
     2.times do |i|
       name = player_name(i + 1)
-      color = if i.zero?
-                :white
-              else
-                :black
-              end
+      color = i.zero? ? :white : :black
       add_player(name, color)
     end
+  end
+
+  def setup
+    add_players if players.empty?
+    add_pieces(players.first, WHITE_PIECES)
+    add_pieces(players.last, BLACK_PIECES)
+    self.player_turn_now = players.first
+    self.player_turn_next = players.last
   end
 
   def add_pieces(player, pieces)
     pieces.each do |notation, name|
       position = notation_to_coordinates(notation)
-      piece = Piece.for(player, name, position)
+      piece = Piece.for(player, name, position, board)
       board.square_at(position).insert_piece(piece)
     end
   end
 
+  def select_piece
+    print 'Piece to move>> '
+    square = user_input
+    if square.piece.nil?
+      puts 'No piece found'
+    elsif square.piece.owner != player_turn_now
+      puts 'Not your piece'
+    else
+      return board.select(square)
+    end
+
+    select_piece
+  end
+
+  def move_piece
+    print 'Move to>> '
+    square = user_input
+
+    selected_piece = board.selected.piece
+    selected_piece.moves.each do |move|
+      if move.destination == square
+        move.apply
+        board.unselect_square
+        return true
+      end
+    end
+
+    puts 'Invalid Move'
+    board.unselect_square
+    false
+  end
+
+  def user_input
+    input = gets.chomp
+
+    if input.match(/[a-h][1-8]/).nil?
+      puts 'Invalid input'
+      return user_input
+    end
+
+    coordinates = notation_to_coordinates(input)
+    board.square_at(coordinates)
+  end
+
+  def make_a_move
+    if board.selected.nil?
+      select_piece
+      false
+    else
+      move_piece
+    end
+  end
+
+  def change_turn
+    played = player_turn_now
+    self.player_turn_now = player_turn_next
+    self.player_turn_next = played
+  end
+
   def play_round
-    add_players if players.empty?
-    add_pieces(players.first, WHITE_PIECES)
-    add_pieces(players.last, BLACK_PIECES)
-    display
+    setup
+
+    loop do
+      display
+      next unless make_a_move
+
+      change_turn
+    end
   end
 
   def display
-    system('clear')
+    # system('clear')
     puts players.last.name
     board.draw
     puts players.first.name

@@ -21,22 +21,11 @@ class Square
     piece.update_position(position)
   end
 
-  def color
-    color_normal
-  end
-
-  def to_s
-    rgb = color.join(';')
-    return "\e[48;2;#{rgb}m   \e[m" unless piece
-    
-    case piece.color
-    when :white
-      "\e[1;1;48;2;#{rgb}m #{piece || ' '} \e[m"
-    when :black
-      "\e[0;30;48;2;#{rgb}m #{piece || ' '} \e[m"
-    end
+  def empty
+    @piece = nil
   end
 end
+
 
 class WhiteSquare < Square
   def color_normal
@@ -54,7 +43,12 @@ class WhiteSquare < Square
   def color_cursor
     WHITE_CURSOR
   end
+
+  def color_possible_move
+    WHITE_POSSIBLE_MOVE
+  end
 end
+
 
 class BlackSquare < Square
   def color_normal
@@ -71,5 +65,9 @@ class BlackSquare < Square
 
   def color_cursor
     BLACK_CURSOR
+  end
+
+  def color_possible_move
+    BLACK_POSSIBLE_MOVE
   end
 end
