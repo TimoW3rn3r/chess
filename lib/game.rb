@@ -25,11 +25,11 @@ class Game
 
   def coordinates_to_notation(coordinates)
     x_coordinate, y_coordinate = coordinates
-    x = (97 + x_coordinate).chr
+    x = ('a'.ord + x_coordinate).chr
     y = (7 - y_coordinate + 1).to_s
     x + y
   end
-  
+
   def add_player(name, color)
     players.push(Player.new(name, color))
   end
@@ -39,7 +39,7 @@ class Game
     print '  Enter player name>> '
     gets.chomp
   end
-  
+
   def add_players
     2.times do |i|
       name = player_name(i + 1)
@@ -64,6 +64,18 @@ class Game
     end
   end
 
+  def user_input
+    input = gets.chomp
+
+    if input.match(/[a-h][1-8]/).nil?
+      puts 'Invalid input'
+      return user_input
+    end
+
+    coordinates = notation_to_coordinates(input)
+    board.square_at(coordinates)
+  end
+
   def select_piece
     print 'Piece to move>> '
     square = user_input
@@ -78,34 +90,24 @@ class Game
     select_piece
   end
 
+  def find_the_move(square)
+    selected_piece = board.selected.piece
+    selected_piece.moves.each do |move|
+      return move if move.destination == square
+    end
+
+    nil
+  end
+
   def move_piece
     print 'Move to>> '
     square = user_input
-
-    selected_piece = board.selected.piece
-    selected_piece.moves.each do |move|
-      if move.destination == square
-        move.apply
-        board.unselect_square
-        return true
-      end
-    end
-
-    puts 'Invalid Move'
+    move = find_the_move(square)
     board.unselect_square
-    false
-  end
+    return puts 'Illegal move!' if move.nil?
 
-  def user_input
-    input = gets.chomp
-
-    if input.match(/[a-h][1-8]/).nil?
-      puts 'Invalid input'
-      return user_input
-    end
-
-    coordinates = notation_to_coordinates(input)
-    board.square_at(coordinates)
+    move.apply
+    true
   end
 
   def make_a_move

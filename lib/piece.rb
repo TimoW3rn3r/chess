@@ -24,14 +24,22 @@ class Piece
     @position = position
     @board = board
     @color = owner.color
+    owner.pieces.push(self)
   end
 
   def update_position(new_position)
     @position = new_position
   end
 
+  def captured
+    owner.pieces.delete(self)
+  end
+
   def capture(piece)
+    piece.captured
     owner.capture(piece)
+    capture_square = board.square_at(piece.position)
+    @board.empty(capture_square)
   end
 
   def reset_moves
@@ -48,7 +56,6 @@ class Piece
     symbol
   end
 end
-
 
 class King < Piece
   def initialize(owner, position, board)
@@ -118,9 +125,12 @@ class Pawn < Piece
     PAWN
   end
 
+  def promote
+    board.promote(self)
+  end
+
   def increase_rank(value)
     @rank += value
-    puts "New rank: #{rank}"
-    puts 'Time to promote -_-' if rank == 8
+    promote if rank == 8
   end
 end

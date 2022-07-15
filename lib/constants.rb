@@ -46,7 +46,8 @@ module DefaultPositions
 end
 
 module Colors
-  WHITE_NORMAL = [240, 217, 181].freeze
+  # WHITE_NORMAL = [240, 217, 181].freeze
+  WHITE_NORMAL = [192, 172, 145].freeze
   WHITE_CURSOR = [250, 172, 134].freeze
   WHITE_POSSIBLE_MOVE = [172, 172, 134].freeze
   WHITE_SELECTION = [127, 142, 102].freeze

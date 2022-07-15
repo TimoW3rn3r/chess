@@ -38,12 +38,39 @@ class Board
   def insert(piece, square)
     square.insert_piece(piece)
   end
-  
+
+  def reset_calculated_moves(player)
+    player.pieces.each(&:reset_moves)
+  end
+
   def apply_move(move)
     empty(move.source)
-    move.piece.capture(move.takes)
+    move.piece.capture(move.takes) if move.takes
     insert(move.piece, move.destination)
     @last_move = move
+    reset_calculated_moves(move.piece.owner)
+  end
+
+  def promote_to
+    available_pieces = %i[queen rook bishop knight]
+    available_pieces.each_with_index do |piece, index|
+      puts "#{index + 1} => #{piece}"
+    end
+    print "Choose piece(1-#{available_pieces.length})>> "
+    choice = gets.chomp.to_i
+    piece_chosen = available_pieces[choice - 1]
+    return piece_chosen unless piece_chosen.nil?
+
+    puts 'Invalid choice!'
+    promote_to
+  end
+
+  def promote(piece)
+    owner = piece.owner
+    promoted_piece_name = promote_to
+    promoted_piece = Piece.for(owner, promoted_piece_name, piece.position, self)
+    owner.pieces.delete(piece)
+    square_at(piece.position).insert_piece(promoted_piece)
   end
 
   def possible_move?(square)
@@ -62,22 +89,19 @@ class Board
       return square.color_selection if @selected.equal?(square)
       return square.color_possible_move if possible_move?(square)
     elsif last_move?(square)
-      square.color_last_move
+      return square.color_last_move
     end
+    
     square.color_normal
   end
 
   def printable_square(square)
-    rgb = square_color(square).join(';')
+    bg_color = square_color(square).join(';')
     piece = square.piece
-    return "\e[48;2;#{rgb}m   \e[m" unless piece
+    return "\e[48;2;#{bg_color}m   \e[m" unless piece
     
-    case piece.color
-    when :white
-      "\e[1;1;48;2;#{rgb}m #{piece} \e[m"
-    when :black
-      "\e[0;30;48;2;#{rgb}m #{piece} \e[m"
-    end
+    fg_color = piece.color == :white ? '1;1' : '0;30'
+    "\e[#{fg_color};48;2;#{bg_color}m #{piece} \e[m"
   end
 
   def draw
