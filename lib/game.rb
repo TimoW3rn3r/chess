@@ -4,16 +4,15 @@ require_relative 'player'
 require_relative 'piece'
 
 class Game
-  include DefaultPositions
+  # include DefaultPositions
+  include TemporaryPositions
 
-  attr_reader :players, :board
-  attr_accessor :player_turn_now, :player_turn_next
+  attr_reader :players, :board, :current_player
 
   def initialize
     @board = Board.new
     @players = []
-    @player_turn_now = nil
-    @player_turn_next = nil
+    @current_player = nil
   end
 
   def notation_to_coordinates(notation)
@@ -50,10 +49,14 @@ class Game
 
   def setup
     add_players if players.empty?
-    add_pieces(players.first, WHITE_PIECES)
-    add_pieces(players.last, BLACK_PIECES)
-    self.player_turn_now = players.first
-    self.player_turn_next = players.last
+    white = players.first
+    black = players.last
+    add_pieces(white, WHITE_PIECES)
+    add_pieces(black, BLACK_PIECES)
+    
+    white.opponent = black
+    black.opponent = white
+    board.current_player = white
   end
 
   def add_pieces(player, pieces)
@@ -81,7 +84,7 @@ class Game
     square = user_input
     if square.piece.nil?
       puts 'No piece found'
-    elsif square.piece.owner != player_turn_now
+    elsif square.piece.owner != board.current_player
       puts 'Not your piece'
     else
       return board.select(square)
@@ -120,9 +123,7 @@ class Game
   end
 
   def change_turn
-    played = player_turn_now
-    self.player_turn_now = player_turn_next
-    self.player_turn_next = played
+    board.change_turn
   end
 
   def play_round

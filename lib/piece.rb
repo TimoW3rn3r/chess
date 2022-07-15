@@ -6,6 +6,7 @@ class Piece
   include PieceUnicodes
 
   attr_reader :owner, :position, :color, :board, :move_types
+  attr_accessor :moved
 
   def self.for(owner, name, position, board)
     case name
@@ -24,7 +25,14 @@ class Piece
     @position = position
     @board = board
     @color = owner.color
+    @available_moves = []
+    @moves_calculated = false
     owner.pieces.push(self)
+    @moved = false
+  end
+
+  def moved?
+    @moved
   end
 
   def update_position(new_position)
@@ -43,13 +51,18 @@ class Piece
   end
 
   def reset_moves
-    move_types.each(&:reset)
+    @moves_calculated = false
+    @available_moves = []
   end
 
   def moves
-    move_types.reduce([]) do |all_moves, move_type|
+    return @available_moves if @moves_calculated
+
+    @available_moves = move_types.reduce([]) do |all_moves, move_type|
       all_moves + move_type.moves
     end
+    @moves_calculated = true
+    @available_moves
   end
 
   def to_s
@@ -60,7 +73,7 @@ end
 class King < Piece
   def initialize(owner, position, board)
     super
-    @move_types = [RookMoves.new(self, 1), BishopMoves.new(self, 1)]
+    @move_types = [RookMoves.new(self, 1), BishopMoves.new(self, 1), CastleMoves.new(self)]
   end
 
   def symbol

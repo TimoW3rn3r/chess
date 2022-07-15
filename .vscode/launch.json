@@ -10,7 +10,7 @@
       "request": "launch",
       "script": "main.rb",
       "args": [],
-      "askParameters": true
+      "askParameters": false
     },
     {
       "type": "rdbg",

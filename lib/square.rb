@@ -24,6 +24,12 @@ class Square
   def empty
     @piece = nil
   end
+
+  def under_attack_by?(player)
+    player.all_moves.any? do |move|
+      move.destination == self
+    end
+  end
 end
 
 

@@ -11,8 +11,11 @@ class Move
   end
 
   def apply
+    piece.moved = true
     board = piece.board
     board.apply_move(self)
+    piece.owner.reset_moves
+    piece.owner.opponent.reset_moves
   end
 
   def double_pawn_push?
@@ -39,6 +42,20 @@ class PawnMove < Move
   end
 end
 
+class Castle < Move
+  attr_reader :rook_move
+
+  def initialize(piece, source, destination, rook_move)
+    super(piece, source, destination, nil)
+    @rook_move = rook_move
+  end
+
+  def apply
+    rook_move.apply
+    super
+  end
+end
+
 class Moves
   attr_reader :piece, :max_step
 
@@ -46,7 +63,6 @@ class Moves
     @piece = piece
     @max_step = max_step
     @board = piece.board
-    @calculated = false
     @available_moves = []
   end
 
@@ -57,10 +73,10 @@ class Moves
   end
 
   def reached_end?
-    if @target.nil?
-      # square out of board
-      return true
-    elsif @target.piece.nil?
+    # square out of board
+    return true if @target.nil?
+
+    if @target.piece.nil?
       # empty square
       add
       return false
@@ -83,17 +99,10 @@ class Moves
   end
 
   def moves
-    return @available_moves if @calculated
-
+    @available_moves = []
     @source = @board.square_at(piece.position)
     directions.each { |direction| find_moves(direction) }
-    @calculated = true
     @available_moves
-  end
-
-  def reset
-    @calculated = false
-    @available_moves = []
   end
 end
 
@@ -134,6 +143,12 @@ class PawnPush < Moves
     true
   end
 
+  def moves
+    return [] if piece.owner != @board.current_player
+
+    super
+  end
+
   def add
     @available_moves.push(
       PawnMove.new(piece, @source, @target, @target.piece, @step)
@@ -165,7 +180,7 @@ class PawnTakes < Moves
     return true if @target.nil? || @target.piece&.owner == piece.owner
 
     if @target.piece.nil?
-      check_en_pessant
+      piece.owner == @board.current_player ? check_en_pessant : add
     else
       @takes = @target.piece
       add
@@ -177,6 +192,62 @@ class PawnTakes < Moves
   def add
     @available_moves.push(
       PawnMove.new(piece, @source, @target, @takes)
+    )
+  end
+end
+
+class CastleMoves < Moves
+  attr_reader :rook, :rook_move
+
+  def initialize(piece, max_step = 8)
+    super
+    @rook = nil
+    @rook_move = nil
+    @rook_destination = nil
+  end
+
+  def directions
+    [[1, 0], [-1, 0]]
+  end
+
+  def moves
+    return [] if piece.moved? || piece.owner != @board.current_player
+
+    super
+  end
+
+  def reached_end?
+    target_piece = @target.piece
+    return (@target.under_attack_by?(piece.owner.opponent) ? true : false) if target_piece.nil?
+
+    if target_piece.owner == piece.owner && target_piece.is_a?(Rook) && !target_piece.moved?
+      @rook = target_piece
+      fetch_target
+      add
+    end
+
+    true
+  end
+
+  def fetch_rook_move
+    rook_source = @board.square_at(rook.position)
+    Move.new(rook, rook_source, @rook_destination, nil)
+  end
+
+  def fetch_target
+    king_position = piece.position
+    rook_position = rook.position
+
+    direction = [(rook_position[0] - king_position[0]).positive? ? 1 : -1, 0]
+    target_rook_position = king_position.zip(direction).map(&:sum)
+    target_king_position = target_rook_position.zip(direction).map(&:sum)
+    @target = @board.square_at(target_king_position)
+    @rook_destination = @board.square_at(target_rook_position)
+  end
+
+  def add
+    @available_moves.push(
+      Castle.new(piece, @source, @target, fetch_rook_move)
     )
   end
 end

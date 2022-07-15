@@ -2,13 +2,19 @@ require_relative 'square'
 
 class Board
   attr_reader :squares, :selected, :last_move
+  attr_accessor :current_player
 
   def initialize
     @selected = nil
     @last_move = nil
+    @current_player = nil
     create_squares
   end
 
+  def change_turn
+    self.current_player = current_player.opponent
+  end
+  
   def select(square)
     @selected = square
   end
@@ -48,7 +54,6 @@ class Board
     move.piece.capture(move.takes) if move.takes
     insert(move.piece, move.destination)
     @last_move = move
-    reset_calculated_moves(move.piece.owner)
   end
 
   def promote_to
