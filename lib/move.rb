@@ -17,13 +17,6 @@ class Move
     piece.owner.reset_moves
     piece.owner.opponent.reset_moves
   end
-
-  def double_pawn_push?
-    return false unless is_a?(PawnMove)
-
-    push_amount = source.position[1] - destination.position[1]
-    push_amount.abs == 2
-  end
 end
 
 class PawnMove < Move
@@ -35,6 +28,16 @@ class PawnMove < Move
   def apply
     super
     piece.increase_rank(@rank_up)
+  end
+
+  def jumped_square
+    column, source_row = source.position
+    target_row = destination.position[1]
+    # when move is not pawn double push
+    return nil unless (source_row - target_row).abs == 2
+
+    jumped_row = (source_row + target_row) / 2
+    piece.board.square_at([column, jumped_row])
   end
 
   def jump_to_same_rank?(test_piece)
@@ -161,17 +164,11 @@ class PawnTakes < Moves
     piece.color == :white ? [[1, -1], [-1, -1]] : [[1, 1], [-1, 1]]
   end
 
-  def fetch_target(last_move)
-    target_coordinates = last_move.source.position.zip(last_move.destination.position).map { |arr| arr.sum / 2 }
-    @target = @board.square_at(target_coordinates)
-  end
-
   def check_en_pessant
     last_move = @board.last_move
     return if last_move.nil?
-    return unless last_move.double_pawn_push? && last_move.jump_to_same_rank?(piece)
+    return unless last_move.is_a?(PawnMove) && last_move.jumped_square.equal?(@target)
 
-    fetch_target(last_move)
     @takes = last_move.piece
     add
   end

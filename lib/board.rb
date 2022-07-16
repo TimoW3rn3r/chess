@@ -45,10 +45,6 @@ class Board
     square.insert_piece(piece)
   end
 
-  def reset_calculated_moves(player)
-    player.pieces.each(&:reset_moves)
-  end
-
   def apply_move(move)
     empty(move.source)
     move.piece.capture(move.takes) if move.takes
