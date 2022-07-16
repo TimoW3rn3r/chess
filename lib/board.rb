@@ -74,8 +74,19 @@ class Board
     square_at(piece.position).insert_piece(promoted_piece)
   end
 
+  def find_move(test_move)
+    current_player.all_moves.each do |move|
+      next if move.source.position != test_move.source.position
+      return move if move.destination.position == test_move.destination.position
+    end
+  end
+  
+  def king_in_check?
+    current_player.king_in_check?
+  end
+
   def possible_move?(square)
-    @selected.piece.moves.each do |move|
+    @selected.piece.valid_moves.each do |move|
       return true if move.destination.equal?(square)
     end
     false

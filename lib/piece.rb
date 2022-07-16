@@ -25,10 +25,8 @@ class Piece
     @position = position
     @board = board
     @color = owner.color
-    @available_moves = []
-    @moves_calculated = false
     owner.pieces.push(self)
-    @moved = false
+    reset_moves
   end
 
   def moved?
@@ -51,18 +49,18 @@ class Piece
   end
 
   def reset_moves
-    @moves_calculated = false
-    @available_moves = []
+    @moves = nil
+    @valid_moves = nil
   end
 
   def moves
-    return @available_moves if @moves_calculated
-
-    @available_moves = move_types.reduce([]) do |all_moves, move_type|
+    @moves ||= move_types.reduce([]) do |all_moves, move_type|
       all_moves + move_type.moves
     end
-    @moves_calculated = true
-    @available_moves
+  end
+
+  def valid_moves
+    @valid_moves ||= moves.each.select(&:safe?)
   end
 
   def to_s
@@ -73,11 +71,20 @@ end
 class King < Piece
   def initialize(owner, position, board)
     super
+    owner.king = self
     @move_types = [RookMoves.new(self, 1), BishopMoves.new(self, 1), CastleMoves.new(self)]
   end
 
   def symbol
     KING
+  end
+
+  def in_check?
+    owner.opponent.all_moves.each do |move|
+      return true if move.takes == self
+    end
+
+    false
   end
 end
 

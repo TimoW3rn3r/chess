@@ -4,8 +4,8 @@ require_relative 'player'
 require_relative 'piece'
 
 class Game
-  # include DefaultPositions
-  include TemporaryPositions
+  include DefaultPositions
+  # include TemporaryPositions
 
   attr_reader :players, :board, :current_player
 
@@ -53,7 +53,7 @@ class Game
     black = players.last
     add_pieces(white, WHITE_PIECES)
     add_pieces(black, BLACK_PIECES)
-    
+
     white.opponent = black
     black.opponent = white
     board.current_player = white
@@ -95,7 +95,7 @@ class Game
 
   def find_the_move(square)
     selected_piece = board.selected.piece
-    selected_piece.moves.each do |move|
+    selected_piece.valid_moves.each do |move|
       return move if move.destination == square
     end
 
@@ -126,14 +126,26 @@ class Game
     board.change_turn
   end
 
+  def game_over?
+    king_in_check = board.current_player.king_in_check?
+    if board.current_player.valid_moves.empty?
+      display
+      puts(king_in_check ? 'CHECKMATE!' : 'STALEMATE!')
+      return true
+    end
+
+    puts 'CHECK!' if king_in_check
+  end
+
   def play_round
     setup
-
     loop do
       display
       next unless make_a_move
 
+      players.each(&:reset_moves)
       change_turn
+      break if game_over?
     end
   end
 

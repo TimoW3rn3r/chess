@@ -16,7 +16,7 @@ module TemporaryPositions
     a2: :pawn,
     b2: :pawn,
     c2: :pawn,
-    d2: :pawn,
+    d6: :pawn,
     e2: :pawn,
     f2: :pawn,
     g4: :pawn,
@@ -29,7 +29,7 @@ module TemporaryPositions
     c8: :bishop,
     d8: :queen,
     e8: :king,
-    f8: :bishop,
+    d2: :bishop,
     g8: :knight,
     h8: :rook,
 

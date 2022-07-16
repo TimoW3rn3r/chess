@@ -17,6 +17,17 @@ class Move
     piece.owner.reset_moves
     piece.owner.opponent.reset_moves
   end
+
+  def safe?
+    temp_board = Marshal.load(Marshal.dump(piece.board))
+    temp_move = temp_board.find_move(self)
+    temp_move.apply
+    !temp_board.king_in_check?
+  end
+
+  def to_s
+    "#{source.position}>#{destination.position}"
+  end
 end
 
 class PawnMove < Move
@@ -208,7 +219,7 @@ class CastleMoves < Moves
   end
 
   def moves
-    return [] if piece.moved? || piece.owner != @board.current_player
+    return [] if piece.moved? || piece.owner != @board.current_player || piece.in_check?
 
     super
   end
