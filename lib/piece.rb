@@ -5,7 +5,7 @@ require_relative 'move'
 class Piece
   include PieceUnicodes
 
-  attr_reader :owner, :position, :color, :board, :move_types
+  attr_reader :owner, :position, :color, :board, :move_types, :value
   attr_accessor :moved
 
   def self.for(owner, name, position, board)
@@ -97,6 +97,10 @@ class Queen < Piece
   def symbol
     QUEEN
   end
+
+  def value
+    10
+  end
 end
 
 class Rook < Piece
@@ -107,6 +111,10 @@ class Rook < Piece
 
   def symbol
     ROOK
+  end
+
+  def value
+    5
   end
 end
 
@@ -119,6 +127,10 @@ class Bishop < Piece
   def symbol
     BISHOP
   end
+
+  def value
+    3.000001
+  end
 end
 
 class Knight < Piece
@@ -129,6 +141,10 @@ class Knight < Piece
 
   def symbol
     KNIGHT
+  end
+
+  def value
+    3
   end
 end
 
@@ -145,6 +161,10 @@ class Pawn < Piece
     PAWN
   end
 
+  def value
+    1
+  end
+  
   def promote
     board.promote(self)
   end

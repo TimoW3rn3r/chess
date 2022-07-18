@@ -64,3 +64,19 @@ module PieceUnicodes
   KNIGHT = "\u265e"
   PAWN = "\u265f"
 end
+
+module Converter
+  def notation_to_coordinates(notation)
+    x, y = String(notation).split('')
+    x_coordinate = x.ord - 'a'.ord
+    y_coordinate = 7 - (y.to_i - 1)
+    [x_coordinate, y_coordinate]
+  end
+
+  def coordinates_to_notation(coordinates)
+    x_coordinate, y_coordinate = coordinates
+    x = ('a'.ord + x_coordinate).chr
+    y = (7 - y_coordinate + 1).to_s
+    x + y
+  end
+end

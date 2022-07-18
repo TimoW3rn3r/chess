@@ -8,64 +8,39 @@ require_relative 'piece'
 class Game
   include DefaultPositions
 
-  attr_reader :players, :board, :current_player
+  attr_reader :players, :board, :current_player, :white, :black
 
   def initialize
     @board = Board.new
-    @players = []
+    @players = {}
     @current_player = nil
+    @white = nil
+    @black = nil
   end
 
-  def notation_to_coordinates(notation)
-    x, y = String(notation).split('')
-    x_coordinate = x.ord - 'a'.ord
-    y_coordinate = 7 - (y.to_i - 1)
-    [x_coordinate, y_coordinate]
-  end
-
-  def coordinates_to_notation(coordinates)
-    x_coordinate, y_coordinate = coordinates
-    x = ('a'.ord + x_coordinate).chr
-    y = (7 - y_coordinate + 1).to_s
-    x + y
-  end
-
-  def add_player(name, color)
-    players.push(Player.new(name, color))
-  end
-
-  def player_name(player_number)
-    puts "Player##{player_number}"
-    print '  Enter player name>> '
-    gets.chomp
+  def get_player(color)
+    print "Enter player name for #{color}>> "
+    name = gets.chomp
+    Player.new(name, color)
   end
 
   def add_players
-    2.times do |i|
-      name = player_name(i + 1)
-      color = i.zero? ? :white : :black
-      add_player(name, color)
-    end
+    @white = get_player(:white)
+    @black = get_player(:black)
+  end
+
+  def add_pieces
+    white.add_pieces(WHITE_PIECES, board)
+    black.add_pieces(BLACK_PIECES, board)
   end
 
   def setup
     add_players if players.empty?
-    white = players.first
-    black = players.last
-    add_pieces(white, WHITE_PIECES)
-    add_pieces(black, BLACK_PIECES)
+    add_pieces
 
     white.opponent = black
     black.opponent = white
     board.current_player = white
-  end
-
-  def add_pieces(player, pieces)
-    pieces.each do |notation, name|
-      position = notation_to_coordinates(notation)
-      piece = Piece.for(player, name, position, board)
-      board.square_at(position).insert_piece(piece)
-    end
   end
 
   def user_input
@@ -179,9 +154,13 @@ class Game
   end
 
   def display
+
     system('clear')
-    puts players.last.name
+    puts white.name
+    puts white.captured_pieces
     board.draw
-    puts players.first.name
+    puts black.captured_pieces
+    puts black.name
+
   end
 end
