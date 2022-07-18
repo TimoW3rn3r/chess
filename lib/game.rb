@@ -1,3 +1,5 @@
+require 'io/console'
+
 require_relative 'constants'
 require_relative 'board'
 require_relative 'player'
@@ -5,7 +7,6 @@ require_relative 'piece'
 
 class Game
   include DefaultPositions
-  # include TemporaryPositions
 
   attr_reader :players, :board, :current_player
 
@@ -79,9 +80,38 @@ class Game
     board.square_at(coordinates)
   end
 
+  def handle_escaped_input
+    case $stdin.getch
+    when 'A' then board.change_cursor([0, -1])
+    when 'B' then board.change_cursor([0, 1])
+    when 'C' then board.change_cursor([1, 0])
+    when 'D' then board.change_cursor([-1, 0])
+    end
+    display
+    false
+  end
+
+  def handle_command_input
+    case $stdin.getch
+    when 'q' then exit
+    when 's' then exit # save_game
+    end
+    false
+  end
+
+  def handle_input
+    case $stdin.getch
+    when "\r" then return board.cursor
+    when '[' then handle_escaped_input
+    when '/' then handle_command_input
+    end
+
+    handle_input
+  end
+
   def select_piece
     print 'Piece to move>> '
-    square = user_input
+    square = handle_input
     if square.piece.nil?
       puts 'No piece found'
     elsif square.piece.owner != board.current_player
@@ -104,7 +134,7 @@ class Game
 
   def move_piece
     print 'Move to>> '
-    square = user_input
+    square = handle_input
     move = find_the_move(square)
     board.unselect_square
     return puts 'Illegal move!' if move.nil?
@@ -143,14 +173,13 @@ class Game
       display
       next unless make_a_move
 
-      players.each(&:reset_moves)
       change_turn
       break if game_over?
     end
   end
 
   def display
-    # system('clear')
+    system('clear')
     puts players.last.name
     board.draw
     puts players.first.name

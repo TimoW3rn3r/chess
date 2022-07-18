@@ -26,7 +26,7 @@ class Move
   end
 
   def to_s
-    "#{source.position}>#{destination.position}"
+    "#{source.position} > #{destination.position}"
   end
 end
 
@@ -49,10 +49,6 @@ class PawnMove < Move
 
     jumped_row = (source_row + target_row) / 2
     piece.board.square_at([column, jumped_row])
-  end
-
-  def jump_to_same_rank?(test_piece)
-    test_piece.position[1] == destination.position[1]
   end
 end
 

@@ -1,53 +1,7 @@
 # frozen_string_literal: true
 
-module TemporaryPositions
-  WHITE_PIECES = {
-    # pieces
-    a1: :rook,
-    b1: :knight,
-    c1: :bishop,
-    d1: :queen,
-    e1: :king,
-    g2: :bishop,
-    f3: :knight,
-    h1: :rook,
-
-    # pawns
-    a2: :pawn,
-    b2: :pawn,
-    c2: :pawn,
-    d6: :pawn,
-    e2: :pawn,
-    f2: :pawn,
-    g4: :pawn,
-    h2: :pawn
-  }.freeze
-
-  BLACK_PIECES = {
-    a8: :rook,
-    b8: :knight,
-    c8: :bishop,
-    d8: :queen,
-    e8: :king,
-    d2: :bishop,
-    g8: :knight,
-    h8: :rook,
-
-    # pawns
-    a7: :pawn,
-    b7: :pawn,
-    c7: :pawn,
-    d7: :pawn,
-    e7: :pawn,
-    f7: :pawn,
-    g7: :pawn,
-    h7: :pawn
-  }.freeze
-end
-
 module DefaultPositions
   WHITE_PIECES = {
-    # pieces
     a1: :rook,
     b1: :knight,
     c1: :bishop,
@@ -57,7 +11,6 @@ module DefaultPositions
     g1: :knight,
     h1: :rook,
 
-    # pawns
     a2: :pawn,
     b2: :pawn,
     c2: :pawn,
@@ -78,7 +31,6 @@ module DefaultPositions
     g8: :knight,
     h8: :rook,
 
-    # pawns
     a7: :pawn,
     b7: :pawn,
     c7: :pawn,
@@ -91,17 +43,16 @@ module DefaultPositions
 end
 
 module Colors
-  # WHITE_NORMAL = [240, 217, 181].freeze
   WHITE_NORMAL = [192, 172, 145].freeze
-  WHITE_CURSOR = [250, 172, 134].freeze
-  WHITE_POSSIBLE_MOVE = [172, 172, 134].freeze
-  WHITE_SELECTION = [127, 142, 102].freeze
+  WHITE_CURSOR = [219, 211, 105].freeze
+  WHITE_POSSIBLE_MOVE = [169, 193, 127].freeze
+  WHITE_SELECTION = [116, 107, 95].freeze
   WHITE_LAST_MOVE = [193, 193, 107].freeze
 
   BLACK_NORMAL = [181, 136, 99].freeze
-  BLACK_CURSOR = [209, 115, 76].freeze
-  BLACK_POSSIBLE_MOVE = [131, 115, 76].freeze
-  BLACK_SELECTION = [98, 101, 61].freeze
+  BLACK_CURSOR = [215, 199, 70].freeze
+  BLACK_POSSIBLE_MOVE = [159, 171, 86].freeze
+  BLACK_SELECTION = [111, 91, 78].freeze
   BLACK_LAST_MOVE = [158, 145, 58].freeze
 end
 
