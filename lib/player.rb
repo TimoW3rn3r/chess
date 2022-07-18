@@ -48,7 +48,7 @@ class Player
   def captured_pieces
     return if captured.empty?
 
-    fg_color = color == :white ? '1;1' : '0;30'
+    fg_color = opponent.color == :white ? '1;1' : '0;30'
     bg_color = '128;128;128'
 
     captured_string = captured

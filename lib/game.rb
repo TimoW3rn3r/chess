@@ -47,7 +47,8 @@ class Game
     input = gets.chomp
 
     if input.match(/[a-h][1-8]/).nil?
-      puts 'Invalid input'
+      @commentary = 'Invalid input'
+      # puts 'Invalid input'
       return user_input
     end
 
@@ -85,16 +86,19 @@ class Game
   end
 
   def select_piece
-    print 'Piece to move>> '
+    # print 'Piece to move>> '
     square = handle_input
     if square.piece.nil?
-      puts 'No piece found'
+      @commentary = 'No piece found'
+      # puts 'No piece found'
     elsif square.piece.owner != board.current_player
-      puts 'Not your piece'
+      @commentary = 'Not your piece'
+      # puts 'Not your piece'
     else
       return board.select(square)
     end
 
+    display
     select_piece
   end
 
@@ -108,17 +112,22 @@ class Game
   end
 
   def move_piece
-    print 'Move to>> '
+    # print 'Move to>> '
     square = handle_input
     move = find_the_move(square)
     board.unselect_square
-    return puts 'Illegal move!' if move.nil?
+    # return puts 'Illegal move!' if move.nil?
+    if move.nil?
+      @commentary = 'Illegal move!'
+      return false
+    end
 
     move.apply
     true
   end
 
   def make_a_move
+    @commentary = ''
     if board.selected.nil?
       select_piece
       false
@@ -139,7 +148,9 @@ class Game
       return true
     end
 
-    puts 'CHECK!' if king_in_check
+    @commentary = 'CHECK!' if king_in_check
+    false
+    # puts 'CHECK!' if king_in_check
   end
 
   def play_round
@@ -153,14 +164,31 @@ class Game
     end
   end
 
-  def display
-
-    system('clear')
-    puts white.name
-    puts white.captured_pieces
-    board.draw
-    puts black.captured_pieces
+  def above_board
+    help
+    puts  # blank line
     puts black.name
+    puts black.captured_pieces
+  end
 
+  def below_board
+    puts white.captured_pieces
+    puts white.name
+    puts "\n#{board.current_player.color.capitalize} to move"
+    puts "\n#{@commentary}"
+  end
+
+  def display
+    system('clear')
+    above_board
+    board.draw
+    below_board
+  end
+
+  def help
+    puts 'C H E S S',
+         '  Move:  ← → ↑ ↓',
+         '  Select: ↵',
+         '  Quit: /q'
   end
 end
