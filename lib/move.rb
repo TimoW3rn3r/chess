@@ -100,6 +100,7 @@ class Moves
     @step = 1
     position = piece.position
     while @step <= max_step
+      @takes = nil
       position = position.zip(direction).map(&:sum)
       @target = @board.square_at(position)
       break if reached_end?
@@ -171,6 +172,11 @@ class PawnTakes < Moves
     piece.color == :white ? [[1, -1], [-1, -1]] : [[1, 1], [-1, 1]]
   end
 
+  def moves
+    @takes = nil
+    super
+  end
+  
   def check_en_pessant
     last_move = @board.last_move
     return if last_move.nil?
