@@ -50,7 +50,7 @@ class Menu
       game = game_choice
     end
 
-    game.play_round
+    game.start
   end
 end
 

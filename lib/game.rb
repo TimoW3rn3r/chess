@@ -39,10 +39,8 @@ class Game
     [white, black].compact
   end
   
-  def setup
-    return unless players.empty?
-    
-    add_players
+  def board_setup
+    board.reset
     add_pieces
 
     white.opponent = black
@@ -154,7 +152,11 @@ class Game
   end
 
   def play_round
-    setup
+    if players.empty?
+      add_players
+      board_setup
+    end
+
     loop do
       display
       next unless make_a_move
@@ -164,6 +166,23 @@ class Game
     end
   end
 
+  def play_again?
+    print 'Play again(y/n): '
+    gets.chomp.downcase == 'y'
+  end
+
+  def start
+    play_round
+    reset
+
+    start if play_again?
+  end
+  
+  def reset
+    players.each(&:reset)
+    board_setup
+  end
+  
   def above_board
     help
     puts black.name
@@ -186,8 +205,9 @@ class Game
 
   def help
     puts 'C H E S S',
-         '  Move:  ← → ↑ ↓',
+         '  Move: ← → ↑ ↓',
          '  Select: ↵',
+         '  Save: /s',
          '  Quit: /q'
   end
 

@@ -8,8 +8,6 @@ class Board
     @selected = nil
     @last_move = nil
     @current_player = nil
-    create_squares
-    @cursor = square_at([4, 4])
   end
 
   def change_turn
@@ -86,6 +84,11 @@ class Board
     current_player.king_in_check?
   end
 
+  def reset
+    create_squares
+    @cursor = square_at([4, 4])
+  end
+  
   def change_cursor(delta)
     x, y = cursor.position
     x_delta, y_delta = delta

@@ -11,12 +11,16 @@ class Player
     @name = name
     @color = color
     @score = 0
+    reset
+  end
+
+  def reset
     @pieces = []
     @captured = []
     @king = nil
     @opponent = nil
   end
-
+  
   def add_pieces(pieces, board)
     pieces.each do |notation, name|
       position = notation_to_coordinates(notation)
