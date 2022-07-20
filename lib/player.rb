@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
 require_relative 'constants'
 require_relative 'piece'
 
+# Player class
 class Player
   include Converter
 
@@ -20,7 +23,7 @@ class Player
     @king = nil
     @opponent = nil
   end
-  
+
   def add_pieces(pieces, board)
     pieces.each do |notation, name|
       position = notation_to_coordinates(notation)
@@ -60,5 +63,9 @@ class Player
                       .join('')
 
     "\e[#{fg_color};48;2;#{bg_color}m" << captured_string << " \e[m"
+  end
+
+  def add_score(value)
+    @score += value
   end
 end

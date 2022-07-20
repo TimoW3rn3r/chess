@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 require_relative 'piece'
 
+# Move class
 class Move
   attr_reader :piece, :source, :destination, :takes
 
@@ -30,6 +33,7 @@ class Move
   end
 end
 
+# PawnMove class
 class PawnMove < Move
   def initialize(piece, source, destination, takes = nil, rank_up = 1)
     super(piece, source, destination, takes)
@@ -52,6 +56,7 @@ class PawnMove < Move
   end
 end
 
+# Castle class
 class Castle < Move
   attr_reader :rook_move
 
@@ -66,6 +71,7 @@ class Castle < Move
   end
 end
 
+# Moves class
 class Moves
   attr_reader :piece, :max_step
 
@@ -117,18 +123,21 @@ class Moves
   end
 end
 
+# RookMoves class
 class RookMoves < Moves
   def directions
     [[-1, 0], [1, 0], [0, -1], [0, 1]]
   end
 end
 
+# BishopMoves class
 class BishopMoves < Moves
   def directions
     [[1, 1], [1, -1], [-1, -1], [-1, 1]]
   end
 end
 
+# KnightMoves class
 class KnightMoves < Moves
   def directions
     [
@@ -140,6 +149,7 @@ class KnightMoves < Moves
   end
 end
 
+# PawnPush class
 class PawnPush < Moves
   def directions
     piece.color == :white ? [[0, -1]] : [[0, 1]]
@@ -167,6 +177,7 @@ class PawnPush < Moves
   end
 end
 
+# PawnTakes class
 class PawnTakes < Moves
   def directions
     piece.color == :white ? [[1, -1], [-1, -1]] : [[1, 1], [-1, 1]]
@@ -176,7 +187,7 @@ class PawnTakes < Moves
     @takes = nil
     super
   end
-  
+
   def check_en_pessant
     last_move = @board.last_move
     return if last_move.nil?
@@ -206,6 +217,7 @@ class PawnTakes < Moves
   end
 end
 
+# CastleMoves class definition
 class CastleMoves < Moves
   attr_reader :rook, :rook_move
 

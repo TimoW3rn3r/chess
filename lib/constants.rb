@@ -65,6 +65,7 @@ module PieceUnicodes
   PAWN = "\u265f"
 end
 
+# Converter Module
 module Converter
   def notation_to_coordinates(notation)
     x, y = String(notation).split('')

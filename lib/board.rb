@@ -1,6 +1,41 @@
+# frozen_string_literal: true
+
 require_relative 'square'
 
+# BoardDisplay module
+module BoardDisplay
+  def square_color(square)
+    return square.color_cursor if @cursor.equal?(square)
+    return square.color_selection if @selected.equal?(square)
+    return square.color_possible_move if @selected && possible_move?(square)
+    return square.color_last_move if last_move?(square)
+
+    square.color_normal
+  end
+
+  def printable_square(square)
+    bg_color = square_color(square).join(';')
+    piece = square.piece
+    return "\e[48;2;#{bg_color}m   \e[m" unless piece
+
+    fg_color = piece.color == :white ? '1;1' : '0;30'
+    "\e[#{fg_color};48;2;#{bg_color}m #{piece} \e[m"
+  end
+
+  def draw
+    squares.each do |square_row|
+      square_row.each do |square|
+        print printable_square(square)
+      end
+      print("\n")
+    end
+  end
+end
+
+# Board class
 class Board
+  include BoardDisplay
+
   attr_reader :squares, :selected, :last_move, :cursor
   attr_accessor :current_player
 
@@ -88,7 +123,7 @@ class Board
     create_squares
     @cursor = square_at([4, 4])
   end
-  
+
   def change_cursor(delta)
     x, y = cursor.position
     x_delta, y_delta = delta
@@ -106,32 +141,5 @@ class Board
 
   def last_move?(square)
     return true if [last_move&.source, last_move&.destination].include?(square)
-  end
-
-  def square_color(square)
-    return square.color_cursor if @cursor.equal?(square)
-    return square.color_selection if @selected.equal?(square)
-    return square.color_possible_move if @selected && possible_move?(square)
-    return square.color_last_move if last_move?(square)
-
-    square.color_normal
-  end
-
-  def printable_square(square)
-    bg_color = square_color(square).join(';')
-    piece = square.piece
-    return "\e[48;2;#{bg_color}m   \e[m" unless piece
-
-    fg_color = piece.color == :white ? '1;1' : '0;30'
-    "\e[#{fg_color};48;2;#{bg_color}m #{piece} \e[m"
-  end
-
-  def draw
-    squares.each do |square_row|
-      square_row.each do |square|
-        print printable_square(square)
-      end
-      print("\n")
-    end
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'io/console'
 
 require_relative 'constants'
@@ -6,46 +8,12 @@ require_relative 'player'
 require_relative 'piece'
 require_relative 'save'
 
-class Game
-  include DefaultPositions
-  include Save
-
-  attr_reader :board, :current_player, :white, :black
-
-  def initialize
-    @board = Board.new
-    @current_player = nil
-    @white = nil
-    @black = nil
-  end
-
+# GameInput module
+module GameInput
   def get_player(color)
     print "Enter player name for #{color}>> "
     name = gets.chomp
     Player.new(name, color)
-  end
-
-  def add_players
-    @white = get_player(:white)
-    @black = get_player(:black)
-  end
-
-  def add_pieces
-    white.add_pieces(WHITE_PIECES, board)
-    black.add_pieces(BLACK_PIECES, board)
-  end
-
-  def players
-    [white, black].compact
-  end
-  
-  def board_setup
-    board.reset
-    add_pieces
-
-    white.opponent = black
-    black.opponent = white
-    board.current_player = white
   end
 
   def user_input
@@ -90,11 +58,130 @@ class Game
     handle_input
   end
 
+  def play_again?
+    print 'Play again(y/n): '
+    gets.chomp.downcase == 'y'
+  end
+
+  def save_game
+    print 'Enter save name: '
+    name = gets.chomp
+    save_to_file(self, name)
+    puts 'Saved'
+    $stdin.getch
+  end
+end
+
+# GameLogic module
+module GameLogic
+  def declare_winner(player)
+    player.add_score(1)
+    display
+    puts "#{player.name} wins with #{player.color} by CHECKMATE!"
+  end
+
+  def declare_draw
+    puts "It's a STALEMATE!"
+    players.each { |player| player.add_score(0.5) }
+  end
+
+  def game_over?
+    king_in_check = current_player.king_in_check?
+    unless current_player.valid_moves.empty?
+      puts 'CHECK!' if king_in_check
+      return false
+    end
+
+    last_moved = current_player.opponent
+    king_in_check ? declare_winner(last_moved) : declare_draw
+    true
+  end
+end
+
+# GameDisplay module
+module GameDisplay
+  def info(player)
+    "#{player.name}(#{player.score})"
+  end
+
+  def above_board
+    puts help
+    puts info(black)
+    puts black.captured_pieces
+  end
+
+  def below_board
+    puts white.captured_pieces
+    puts info(white)
+    puts "\n#{current_player.color.capitalize} to move"
+    puts "\n#{@commentary}"
+  end
+
+  def display
+    system('clear')
+    above_board
+    board.draw
+    below_board
+  end
+
+  def help
+    "C H E S S\n" \
+    "  Move: ← → ↑ ↓\n" \
+    "  Select: ↵\n" \
+    "  Save: /s\n" \
+    "  Quit: /q\n\n"
+  end
+end
+
+# Game class
+class Game
+  include GameInput
+  include GameDisplay
+  include GameLogic
+  include DefaultPositions
+  include Save
+
+  attr_reader :board, :white, :black
+
+  def initialize
+    @board = Board.new
+    @current_player = nil
+    @white = nil
+    @black = nil
+  end
+
+  def add_players
+    @white = get_player(:white)
+    @black = get_player(:black)
+  end
+
+  def add_pieces
+    white.add_pieces(WHITE_PIECES, board)
+    black.add_pieces(BLACK_PIECES, board)
+  end
+
+  def players
+    [white, black].compact
+  end
+
+  def current_player
+    board.current_player
+  end
+
+  def board_setup
+    board.reset
+    add_pieces
+
+    white.opponent = black
+    black.opponent = white
+    board.current_player = white
+  end
+
   def select_piece
     square = handle_input
     if square.piece.nil?
       @commentary = 'No piece found'
-    elsif square.piece.owner != board.current_player
+    elsif square.piece.owner != current_player
       @commentary = 'Not your piece'
     else
       return board.select(square)
@@ -139,18 +226,6 @@ class Game
     board.change_turn
   end
 
-  def game_over?
-    king_in_check = board.current_player.king_in_check?
-    if board.current_player.valid_moves.empty?
-      display
-      puts(king_in_check ? 'CHECKMATE!' : 'STALEMATE!')
-      return true
-    end
-
-    @commentary = 'CHECK!' if king_in_check
-    false
-  end
-
   def play_round
     if players.empty?
       add_players
@@ -166,56 +241,15 @@ class Game
     end
   end
 
-  def play_again?
-    print 'Play again(y/n): '
-    gets.chomp.downcase == 'y'
-  end
-
   def start
     play_round
     reset
 
     start if play_again?
   end
-  
+
   def reset
     players.each(&:reset)
     board_setup
-  end
-  
-  def above_board
-    help
-    puts black.name
-    puts black.captured_pieces
-  end
-
-  def below_board
-    puts white.captured_pieces
-    puts white.name
-    puts "\n#{board.current_player.color.capitalize} to move"
-    puts "\n#{@commentary}"
-  end
-
-  def display
-    system('clear')
-    above_board
-    board.draw
-    below_board
-  end
-
-  def help
-    puts 'C H E S S',
-         '  Move: ← → ↑ ↓',
-         '  Select: ↵',
-         '  Save: /s',
-         '  Quit: /q'
-  end
-
-  def save_game
-    print 'Enter save name: '
-    name = gets.chomp
-    save_to_file(self, name)
-    puts "Saved"
-    $stdin.getch
   end
 end

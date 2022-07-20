@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
+# Save module
 module Save
-  SAVE_DIR = './saved_games'.freeze
-  EXTENSION = '.bin'.freeze
+  SAVE_DIR = './saved_games'
+  EXTENSION = 'bin'
 
   def saved_list
     files = Dir.glob("saved_games/*.#{EXTENSION}")
@@ -18,7 +21,7 @@ module Save
       file.puts binary
     end
   end
-  
+
   def load_from_file(game_name)
     save_file = "./saved_games/#{game_name}.#{EXTENSION}"
     # read from file
