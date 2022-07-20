@@ -4,15 +4,16 @@ require_relative 'constants'
 require_relative 'board'
 require_relative 'player'
 require_relative 'piece'
+require_relative 'save'
 
 class Game
   include DefaultPositions
+  include Save
 
-  attr_reader :players, :board, :current_player, :white, :black
+  attr_reader :board, :current_player, :white, :black
 
   def initialize
     @board = Board.new
-    @players = {}
     @current_player = nil
     @white = nil
     @black = nil
@@ -34,8 +35,14 @@ class Game
     black.add_pieces(BLACK_PIECES, board)
   end
 
+  def players
+    [white, black].compact
+  end
+  
   def setup
-    add_players if players.empty?
+    return unless players.empty?
+    
+    add_players
     add_pieces
 
     white.opponent = black
@@ -69,7 +76,7 @@ class Game
   def handle_command_input
     case $stdin.getch
     when 'q' then exit
-    when 's' then exit # save_game
+    when 's' then save_game
     end
     false
   end
@@ -182,5 +189,13 @@ class Game
          '  Move:  ← → ↑ ↓',
          '  Select: ↵',
          '  Quit: /q'
+  end
+
+  def save_game
+    print 'Enter save name: '
+    name = gets.chomp
+    save_to_file(self, name)
+    puts "Saved"
+    $stdin.getch
   end
 end
