@@ -48,7 +48,6 @@ class Game
 
     if input.match(/[a-h][1-8]/).nil?
       @commentary = 'Invalid input'
-      # puts 'Invalid input'
       return user_input
     end
 
@@ -76,6 +75,7 @@ class Game
   end
 
   def handle_input
+    @commentary = ''
     case $stdin.getch
     when "\r" then return board.cursor
     when '[' then handle_escaped_input
@@ -86,14 +86,11 @@ class Game
   end
 
   def select_piece
-    # print 'Piece to move>> '
     square = handle_input
     if square.piece.nil?
       @commentary = 'No piece found'
-      # puts 'No piece found'
     elsif square.piece.owner != board.current_player
       @commentary = 'Not your piece'
-      # puts 'Not your piece'
     else
       return board.select(square)
     end
@@ -112,11 +109,9 @@ class Game
   end
 
   def move_piece
-    # print 'Move to>> '
     square = handle_input
     move = find_the_move(square)
     board.unselect_square
-    # return puts 'Illegal move!' if move.nil?
     if move.nil?
       @commentary = 'Illegal move!'
       return false
@@ -127,7 +122,6 @@ class Game
   end
 
   def make_a_move
-    @commentary = ''
     if board.selected.nil?
       select_piece
       false
@@ -150,7 +144,6 @@ class Game
 
     @commentary = 'CHECK!' if king_in_check
     false
-    # puts 'CHECK!' if king_in_check
   end
 
   def play_round
@@ -166,7 +159,6 @@ class Game
 
   def above_board
     help
-    puts  # blank line
     puts black.name
     puts black.captured_pieces
   end
