@@ -62,10 +62,35 @@ class Player
                       .sort { |piece1, piece2| piece1.value > piece2.value ? 1 : -1 }
                       .join('')
 
-    "\e[#{fg_color};48;2;#{bg_color}m" << captured_string << " \e[m"
+    "\e[#{fg_color};48;2;#{bg_color}m#{captured_string} \e[m"
   end
 
   def add_score(value)
     @score += value
+  end
+
+  def input
+    case $stdin.getch
+    when "\r" then { message: :confirm }
+    when '[' then handle_escaped_input
+    when '/' then handle_command_input
+    else input
+    end
+  end
+
+  def handle_escaped_input
+    {
+      'A' => { message: :cursor_move, value: [0, -1] },
+      'B' => { message: :cursor_move, value: [0, 1] },
+      'C' => { message: :cursor_move, value: [1, 0] },
+      'D' => { message: :cursor_move, value: [-1, 0] }
+    }[$stdin.getch]
+  end
+
+  def handle_command_input
+    {
+      'q' => { message: :quit },
+      's' => { message: :save_game }
+    }[$stdin.getch]
   end
 end
