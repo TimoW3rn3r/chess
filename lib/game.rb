@@ -16,48 +16,6 @@ module GameInput
     Player.new(name, color)
   end
 
-  def user_input
-    input = gets.chomp
-
-    if input.match(/[a-h][1-8]/).nil?
-      @commentary = 'Invalid input'
-      return user_input
-    end
-
-    coordinates = notation_to_coordinates(input)
-    board.square_at(coordinates)
-  end
-
-  def handle_escaped_input
-    case $stdin.getch
-    when 'A' then board.change_cursor([0, -1])
-    when 'B' then board.change_cursor([0, 1])
-    when 'C' then board.change_cursor([1, 0])
-    when 'D' then board.change_cursor([-1, 0])
-    end
-    display
-    false
-  end
-
-  def handle_command_input
-    case $stdin.getch
-    when 'q' then exit
-    when 's' then save_game
-    end
-    false
-  end
-
-  def handle_input
-    @commentary = ''
-    case $stdin.getch
-    when "\r" then return board.cursor
-    when '[' then handle_escaped_input
-    when '/' then handle_command_input
-    end
-
-    handle_input
-  end
-
   def play_again?
     print 'Play again(y/n): '
     gets.chomp.downcase == 'y'
@@ -88,13 +46,26 @@ module GameLogic
   def game_over?
     king_in_check = current_player.king_in_check?
     unless current_player.valid_moves.empty?
-      puts 'CHECK!' if king_in_check
+      @commentary = 'CHECK!' if king_in_check
       return false
     end
 
     last_moved = current_player.opponent
     king_in_check ? declare_winner(last_moved) : declare_draw
     true
+  end
+
+  def handle_message(message)
+    case message[:message]
+    when :save_game then save_game
+    when :quit
+      puts 'Good Game'
+      exit
+    when :cursor_move
+      board.change_cursor(message[:value])
+    when :confirm
+      make_a_move
+    end
   end
 end
 
@@ -141,18 +112,19 @@ class Game
   include DefaultPositions
   include Save
 
-  attr_reader :board, :white, :black
+  attr_reader :board, :white, :black, :turn_complete
 
   def initialize
     @board = Board.new
     @current_player = nil
     @white = nil
     @black = nil
+    @turn_complete = false
   end
 
   def add_players
-    @white = get_player(:white)
-    @black = get_player(:black)
+    @white = Player.for(:white)
+    @black = Player.for(:black)
   end
 
   def add_pieces
@@ -177,8 +149,15 @@ class Game
     board.current_player = white
   end
 
+  def game_setup
+    return unless players.empty?
+
+    add_players
+    board_setup
+  end
+
   def select_piece
-    square = handle_input
+    square = board.cursor
     if square.piece.nil?
       @commentary = 'No piece found'
     elsif square.piece.owner != current_player
@@ -188,7 +167,7 @@ class Game
     end
 
     display
-    select_piece
+    # select_piece
   end
 
   def find_the_move(square)
@@ -201,22 +180,21 @@ class Game
   end
 
   def move_piece
-    square = handle_input
+    square = board.cursor
     move = find_the_move(square)
     board.unselect_square
     if move.nil?
       @commentary = 'Illegal move!'
-      return false
+      return
     end
 
     move.apply
-    true
+    @turn_complete = true
   end
 
   def make_a_move
     if board.selected.nil?
       select_piece
-      false
     else
       move_piece
     end
@@ -224,17 +202,15 @@ class Game
 
   def change_turn
     board.change_turn
+    @turn_complete = false
   end
 
   def play_round
-    if players.empty?
-      add_players
-      board_setup
-    end
-
+    game_setup
     loop do
       display
-      next unless make_a_move
+      handle_message(current_player.input)
+      redo unless turn_complete
 
       change_turn
       break if game_over?

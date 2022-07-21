@@ -10,6 +10,12 @@ class Player
   attr_reader :name, :color, :score, :pieces, :captured
   attr_accessor :opponent, :king
 
+  def self.for(color)
+    print "Enter player name for #{color}>> "
+    name = gets.chomp
+    Player.new(name, color)
+  end
+
   def initialize(name, color)
     @name = name
     @color = color

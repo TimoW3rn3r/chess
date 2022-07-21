@@ -1,4 +1,4 @@
 Metrics/ClassLength:
-  Enabled: true
-Styles/StringLiterals:
+  Enabled: false
+Style/StringLiterals:
   Enabled: true
