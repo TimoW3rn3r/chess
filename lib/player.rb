@@ -13,6 +13,8 @@ class Player
   def self.for(color)
     print "Enter player name for #{color}>> "
     name = gets.chomp
+    return Bot.new('Bot', color) if name.downcase == 'bot'
+    
     Player.new(name, color)
   end
 
@@ -98,5 +100,12 @@ class Player
       'q' => { message: :quit },
       's' => { message: :save_game }
     }[$stdin.getch]
+  end
+end
+
+# Bot class
+class Bot < Player
+  def input
+    { message: :move, value: valid_moves.sample }
   end
 end

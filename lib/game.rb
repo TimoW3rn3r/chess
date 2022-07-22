@@ -10,12 +10,6 @@ require_relative 'save'
 
 # GameInput module
 module GameInput
-  def get_player(color)
-    print "Enter player name for #{color}>> "
-    name = gets.chomp
-    Player.new(name, color)
-  end
-
   def play_again?
     print 'Play again(y/n): '
     gets.chomp.downcase == 'y'
@@ -58,13 +52,13 @@ module GameLogic
   def handle_message(message)
     case message[:message]
     when :save_game then save_game
-    when :quit
-      puts 'Good Game'
-      exit
-    when :cursor_move
-      board.change_cursor(message[:value])
-    when :confirm
-      make_a_move
+    when :quit then quit
+    when :cursor_move then board.change_cursor(message[:value])
+    when :confirm then make_a_move
+    when :move
+      move = message[:value]
+      move.apply
+      @turn_complete = true
     end
   end
 end
@@ -227,5 +221,10 @@ class Game
   def reset
     players.each(&:reset)
     board_setup
+  end
+
+  def quit
+    puts 'Thanks for playing!'
+    exit
   end
 end
