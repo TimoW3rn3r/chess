@@ -107,7 +107,7 @@ class Player
   end
 
   def insufficient_mating_material?
-    sorted_pieces = pieces.sort { |piece1, piece2| piece1.value > piece2.value ? 1 : -1 }
+    sorted_pieces = pieces.sort { |piece1, piece2| piece1.value > piece2.value ? -1 : 1 }
     case sorted_pieces
     in [King] then true
     in [King, Bishop] then true
@@ -122,7 +122,7 @@ end
 # Bot class
 class Bot < Player
   def input
-    sleep(0.5)
+    sleep(0.2)
     { message: :move, value: valid_moves.sample }
   end
 
