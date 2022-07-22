@@ -32,21 +32,41 @@ module GameLogic
     puts "#{player.name} wins with #{player.color} by CHECKMATE!"
   end
 
-  def declare_draw
-    puts "It's a STALEMATE!"
+  def declare_draw(draw_statement)
     players.each { |player| player.add_score(0.5) }
+    display
+    puts draw_statement
   end
 
-  def game_over?
-    king_in_check = current_player.king_in_check?
-    unless current_player.valid_moves.empty?
-      @commentary = 'CHECK!' if king_in_check
-      return false
+  def checkmate?
+    if current_player.valid_moves.empty?
+      last_moved = current_player.opponent
+      declare_winner(last_moved)
+      true
+    else
+      @commentary = 'CHECK!'
+      false
     end
+  end
 
-    last_moved = current_player.opponent
-    king_in_check ? declare_winner(last_moved) : declare_draw
+  def stalemate?
+    return false unless current_player.valid_moves.empty?
+    
+    declare_draw('Draw by STALEMATE!')
     true
+  end
+
+  def insufficient_mating_material?
+    return false unless players.all?(&:insufficient_mating_material?)
+
+    declare_draw('Draw because of INSUFFICIENT MATING MATERIAL!')
+    true
+  end
+  
+  def game_over?
+    return checkmate? if current_player.king_in_check?
+    
+    stalemate? || insufficient_mating_material?
   end
 
   def handle_message(message)
@@ -166,7 +186,6 @@ class Game
     end
 
     display
-    # select_piece
   end
 
   def find_the_move(square)
@@ -206,6 +225,7 @@ class Game
     game_setup
     loop do
       display
+      @commentary = ''
       handle_message(current_player.input)
       redo unless turn_complete
 

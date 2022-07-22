@@ -238,6 +238,8 @@ class CastleMoves < Moves
   end
 
   def reached_end?
+    return true if @target.nil?
+    
     target_piece = @target.piece
     return (@target.under_attack_by?(piece.owner.opponent) ? true : false) if target_piece.nil?
 

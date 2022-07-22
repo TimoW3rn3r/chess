@@ -105,11 +105,24 @@ class Player
   def choose_from(_choices)
     gets.chomp.to_i
   end
+
+  def insufficient_mating_material?
+    sorted_pieces = pieces.sort { |piece1, piece2| piece1.value > piece2.value ? 1 : -1 }
+    case sorted_pieces
+    in [King] then true
+    in [King, Bishop] then true
+    in [King, Knight] then true
+    in [King, Knight, Knight] then true
+    else
+      false
+    end
+  end
 end
 
 # Bot class
 class Bot < Player
   def input
+    sleep(0.5)
     { message: :move, value: valid_moves.sample }
   end
 

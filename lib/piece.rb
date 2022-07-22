@@ -86,6 +86,10 @@ class King < Piece
 
     false
   end
+
+  def value
+    100
+  end
 end
 
 class Queen < Piece
