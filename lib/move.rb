@@ -40,8 +40,7 @@ class PawnMove < Move
     @rank_up = rank_up
   end
 
-  def apply
-    super
+  def increase_pawn_rank
     piece.increase_rank(@rank_up)
   end
 

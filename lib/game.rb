@@ -57,9 +57,14 @@ module GameLogic
     when :confirm then make_a_move
     when :move
       move = message[:value]
-      move.apply
-      @turn_complete = true
+      apply_move(move)
     end
+  end
+
+  def apply_move(move)
+    move.apply
+    move.increase_pawn_rank if move.is_a?(PawnMove)
+    @turn_complete = true
   end
 end
 
@@ -181,9 +186,7 @@ class Game
       @commentary = 'Illegal move!'
       return
     end
-
-    move.apply
-    @turn_complete = true
+    apply_move(move)
   end
 
   def make_a_move

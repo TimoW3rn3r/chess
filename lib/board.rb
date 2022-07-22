@@ -92,7 +92,7 @@ class Board
       puts "#{index + 1} => #{piece}"
     end
     print "Choose piece(1-#{available_pieces.length})>> "
-    choice = gets.chomp.to_i
+    choice = current_player.choose_from((1..available_pieces.length).to_a)
     piece_chosen = available_pieces[choice - 1]
     return piece_chosen unless piece_chosen.nil?
 
@@ -101,10 +101,9 @@ class Board
   end
 
   def promote(piece)
-    owner = piece.owner
     promoted_piece_name = promote_to
-    promoted_piece = Piece.for(owner, promoted_piece_name, piece.position, self)
-    owner.pieces.delete(piece)
+    promoted_piece = Piece.for(current_player, promoted_piece_name, piece.position, self)
+    current_player.pieces.delete(piece)
     square_at(piece.position).insert_piece(promoted_piece)
   end
 

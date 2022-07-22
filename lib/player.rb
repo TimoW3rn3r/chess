@@ -101,11 +101,19 @@ class Player
       's' => { message: :save_game }
     }[$stdin.getch]
   end
+
+  def choose_from(_choices)
+    gets.chomp.to_i
+  end
 end
 
 # Bot class
 class Bot < Player
   def input
     { message: :move, value: valid_moves.sample }
+  end
+
+  def choose_from(choices)
+    choices.sample
   end
 end
